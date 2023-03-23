@@ -18,8 +18,11 @@ const createGrade = (grade, baseUrl, url) => {
   const gradeElement = document.createElement(`span`);
   if (grade === undefined) {
     const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-    const launchMesure = (gradeCTAElement) => {
-      gradeCTAElement.append(`. Mesure en cours...`);
+    const waitElement = document.createElement(`span`);
+    waitElement.setAttribute(`class`, `wait`);
+    waitElement.append(`Mesure en cours...`);
+    const launchMesure = (gradeElement) => {
+      gradeElement.replaceChildren(waitElement);
       fetch(`${baseUrl}/api/tasks`, {
         method: `POST`,
         headers: {
@@ -37,7 +40,12 @@ const createGrade = (grade, baseUrl, url) => {
               getMesureResult(data);
             });
           } else {
-            console.error(`fetch error`);
+            const limitReachedElement = document.createElement(`span`);
+            limitReachedElement.setAttribute(`class`, `limit-reached`);
+            limitReachedElement.append(
+              `Le nombre de mesures est limité. Veuillez réessayer demain.`
+            );
+            gradeElement.replaceChildren(limitReachedElement);
           }
         })
         .catch(console.error);
@@ -86,7 +94,7 @@ const createGrade = (grade, baseUrl, url) => {
         (event.pointerType === `touch` &&
           event.target.getAttribute(`data-link-opened`) === `true`)
       ) {
-        launchMesure(gradeCTAElement);
+        launchMesure(gradeElement);
       }
     });
   } else {
@@ -133,13 +141,11 @@ const createStyle = (theme, color) => {
       };
       border-radius: 50%;
       width: 1.5em;
-      
       font-weight: 500;
     }
     #ecoindex-badge #badge span.undefined {
       background-color: #808080;
       border-radius: 1em;
-      color: #000;
       min-width: 1.5em;
       cursor: pointer;
     }
@@ -160,6 +166,14 @@ const createStyle = (theme, color) => {
       padding-right: .5em;
       width: auto;
     }
+    #ecoindex-badge #badge span.undefined span.wait,
+    #ecoindex-badge #badge span.undefined span.limit-reached {
+      padding-left: .5em;
+      padding-right: .5em;
+    }
+    #ecoindex-badge #badge span.undefined span.limit-reached {
+      font-weight: bold;
+    }
   `);
   return styleElement;
 };
@@ -171,7 +185,7 @@ const displayBadge = () => {
   resetResultBadge();
   const baseUrl = `https://bff.ecoindex.fr`;
   // const url = window.location.href;
-  const url = `https://www.theshifters.org/association/contacts/`;
+  const url = `https://sws.staging.theshifters.org/association/qui-sommes-nous/`;
   const badge = document.getElementById(`ecoindex-badge`);
   const theme = badge.getAttribute(`data-ecoindex-theme`) ?? `light`;
   const undefinedResult = () => {
