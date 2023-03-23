@@ -184,8 +184,7 @@ const resetResultBadge = () => {
 const displayBadge = () => {
   resetResultBadge();
   const baseUrl = `https://bff.ecoindex.fr`;
-  // const url = window.location.href;
-  const url = `https://sws.staging.theshifters.org/association/qui-sommes-nous/`;
+  const url = window.location.href;
   const badge = document.getElementById(`ecoindex-badge`);
   const theme = badge.getAttribute(`data-ecoindex-theme`) ?? `light`;
   const undefinedResult = () => {
